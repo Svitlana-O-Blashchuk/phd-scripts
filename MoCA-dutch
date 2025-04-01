@@ -1,11 +1,34 @@
 from tkinter import Tk, Button, Frame, Scrollbar, Canvas, font
 from gtts import gTTS
+from playsound import playsound
 import os
+import time
+
+def play_letter_sequence():
+    # Split the sequence into individual characters
+    sequence = "f b a c m n a a j k l b a f a k d e a a a j a m o f a a b"
+    letters = sequence.split()
+    
+    # Create a unique temporary file for each letter
+    for i, letter in enumerate(letters):
+        temp_file = f"temp_{i}.mp3"
+        tts = gTTS(text=letter, lang='nl')
+        tts.save(temp_file)
+        playsound(temp_file)
+        time.sleep(1)  # Wait 1 second between letters
+        try:
+            os.remove(temp_file)
+        except:
+            pass
 
 def play_instruction(text):
     tts = gTTS(text=text, lang='nl')
     tts.save("instruction.mp3")
-    os.system("instruction.mp3")
+    playsound("instruction.mp3")
+    try:
+        os.remove("instruction.mp3")
+    except:
+        pass
 
 def create_scrollable_window():
     window = Tk()
@@ -104,7 +127,7 @@ def create_scrollable_window():
         ("Cijfers omgekeerd nazeggen instruction", "Nu ga ik weer cijfers opnoemen, maar zodra ik klaar ben, moet u ze in omgekeerde volgorde nazeggen."),
         ("742", " 7 4 2", True),
         ("Letter herhalen instructions", "Ik ga u een reeks letters voorlezen. Iedere keer dat ik de letter A noem, tikt u eenmaal met uw hand op tafel. Wanneer ik een andere letter noem, tikt u niet met uw hand op tafel."),
-        ("Letter herhalen", "f . b . a . c . m . n . a . a . j . k . l . b . a . f . a . k . d . e . a . a . a . j . a . m . o . f . a . a . b .", True),
+        ("Letter herhalen", "f b a c m n a a j k l b a f a k d e a a a j a m o f a a b", True),
         ("Aftrekken van 7", "Wilt u van 100 zeven aftrekken en van wat overblijft weer zeven aftrekken en zo doorgaan tot ik stop zeg."),
         ("Zin herhalen 1 instructions", "Ik ga u een zin voorlezen. Zeg deze na zodra ik klaar ben, precies zoals ik hem heb gezegd."),
         ("Zin herhalen 1", "Ik  weet  alleen  dat  Jan  vandaag  geholpen  zou  worden.", True),
@@ -129,9 +152,13 @@ def create_scrollable_window():
         btn_frame = Frame(button_container)
         btn_frame.pack(fill='x', pady=10)
 
-        # Create the button
-        button = Button(btn_frame, text=question, command=lambda q=instruction: play_instruction(q),
-                       width=30, height=2)
+        # Create the button with special handling for Letter herhalen
+        if question == "Letter herhalen":
+            button = Button(btn_frame, text=question, command=play_letter_sequence,
+                          width=30, height=2)
+        else:
+            button = Button(btn_frame, text=question, command=lambda q=instruction: play_instruction(q),
+                          width=30, height=2)
 
         # Configure special buttons
         if is_special:
@@ -255,7 +282,6 @@ def create_scrollable_window():
                        width=30, height=2)
         button.configure(font=base_font)
         button.pack(anchor='center')
-
 
     window.mainloop()
 
